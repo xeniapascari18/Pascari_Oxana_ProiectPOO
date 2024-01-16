@@ -1,369 +1,664 @@
-﻿#include <iostream>
-
+#include <iostream>
 using namespace std;
 
 class Parfum {
 private:
-    string nume;
-    double pret;
-    int cantitate_ml;
+    string marca;
+    int anLansare;
+    const string categorie = "parfum";
+    static int numarParfumuri;
+    int* pointer;
 
 public:
-    // Atribute constante
-    static const int cod_produs = 1001;
+    Parfum(string marca, int anLansare) {
+        //constructor
+        this->marca = marca;
+        this->anLansare = anLansare;
+        numarParfumuri++;
+        pointer = new int;
+    }
 
-    // Atribute statice
-    static int numar_total_vandute;
+    Parfum(string marca) {
+        this->marca = marca;
+        this->anLansare = 2021;
+        numarParfumuri++;
+        pointer = new int;
+    }
 
-    // Constructori
-    Parfum() : nume("Necunoscut"), pret(0.0), cantitate_ml(0) {}
-    Parfum(string nume, double pret, int cantitate_ml)
-        : nume(nume), pret(pret), cantitate_ml(cantitate_ml) {}
-    Parfum(string nume, double pret)
-        : nume(nume), pret(pret), cantitate_ml(50) {}
-    Parfum(string nume)
-        : nume(nume), pret(50.0), cantitate_ml(50) {}
+    Parfum() {
+        this->marca = "Necunoscut";
+        this->anLansare = 2021;
+        numarParfumuri++;
+        pointer = new int;
+    }
 
-    // Constructor de copiere
     Parfum(const Parfum& other) {
-        nume = other.nume;
-        pret = other.pret;
-        cantitate_ml = other.cantitate_ml;
+        marca = other.marca;
+        anLansare = other.anLansare;
+        pointer = new int(*other.pointer);
     }
 
-    // Destructor
     ~Parfum() {
-        // Nu este nevoie s? eliber?m memorie alocat? în HEAP, deoarece nu am alocat memorie dinamic?
+         pointer;
     }
 
-    // Metode de acces (get-eri si set-eri)
-    string getNume() const { return nume; }
-    void setNume(const string& n) { nume = n; }
+    string getMarca() const { return marca; }
+    int getAnLansare() const { return anLansare; }
+    void setMarca(string newMarca) { marca = newMarca; }
+    void setAnLansare(int newAnLansare) { anLansare = newAnLansare; }
 
-    double getPret() const { return pret; }
-    void setPret(double p) { pret = p; }
+    static int getNumarParfumuri() { return numarParfumuri; }
 
-    int getCantitateMl() const { return cantitate_ml; }
-    void setCantitateMl(int cant) { cantitate_ml = cant; }
-
-    // Functie statica pentru calcul
-    static double calculareProfit(int cantitate, double pret) {
-        return cantitate * pret;
+    static void procesareParfum() {
+        cout << "Procesare parfum" << endl;
     }
 
-    friend double calculeazaReducere(const Parfum& parfum, double procent);
+//operatori
+ Parfum& operator=(const Parfum& other) {
+        if (this != &other) {
+            delete pointer;
+            marca = other.marca;
+            anLansare = other.anLansare;
+            pointer = new int(*other.pointer);
+        }
+        return *this;
+    }
+
+    Parfum operator+(int value) const {
+        Parfum result = *this;
+        result.anLansare += value;
+        return result;
+    }
+
+    Parfum operator-(int value) const {
+        Parfum result = *this;
+        result.anLansare -= value;
+        return result;
+    }
+
+    Parfum operator*(int value) const {
+        Parfum result = *this;
+        result.anLansare *= value;
+        return result;
+    }
+
+    friend ostream& operator<<(ostream& os, const Parfum& p);
 };
 
-// Initializare atribut statice
-int Parfum::numar_total_vandute = 0;
+int Parfum::numarParfumuri = 0;
 
-double calculeazaReducere(const Parfum& parfum, double procent) {
-    return parfum.pret - (parfum.pret * procent / 100);
+ostream& operator<<(ostream& os, const Parfum& p) {
+    os << "Marca: " << p.marca << ", Anul Lansarii: " << p.anLansare;
+    return os;
 }
 
+ friend istream& operator>>(istream& is, Parfum& p);
+};
 
-// Suprascrierea operatorului de atribuire
-Parfum& operator=(const Parfum& other) {
-    if (this != &other) {
-        nume = other.nume;
-        pret = other.pret;
-        cantitate_ml = other.cantitate_ml;
+int Parfum::numarParfumuri = 0;
+
+istream& operator>>(istream& is, Parfum& p) {
+    cout << "Introduceti marca parfumului: ";
+    is >> p.marca;
+    cout << "Introduceti anul lansarii parfumului: ";
+    is >> p.anLansare;
+    return is;
+}
+
+// Metoda pentru scrierea informatiilor in fisier text
+    void scrieInFisierText(const string& numeFisier) const {
+        ofstream fout(numeFisier);
+        if (fout.is_open()) {
+            fout << "Marca: " << marca << "\n";
+            fout << "Anul Lansarii: " << anLansare << "\n";
+            fout.close();
+            cout << "Datele au fost scrise in fisierul text.\n";
+        } else {
+            cerr << "Eroare la deschiderea fisierului text.\n";
+        }
     }
-    return *this;
-}
 
-// Suprascrierea operatorului de adunare (+)
-Parfum operator+(const Parfum& other) {
-    Parfum result = *this;
-    result.pret += other.pret;
-    result.cantitate_ml += other.cantitate_ml;
-    return result;
-}
+    // Metoda pentru citirea informatiilor din fisier text
+    void citesteDinFisierText(const string& numeFisier) {
+        ifstream fin(numeFisier);
+        if (fin.is_open()) {
+            fin >> marca >> anLansare;
+            fin.close();
+            cout << "Datele au fost citite din fisierul text.\n";
+        } else {
+            cerr << "Eroare la deschiderea fisierului text.\n";
+        }
+    }
+};
 
-// Suprascrierea operatorului de scadere (-)
-Parfum operator-(const Parfum& other) {
-    Parfum result = *this;
-    result.pret -= other.pret;
-    result.cantitate_ml -= other.cantitate_ml;
-    return result;
-}
+class SetCosmetic {
+private:
+    string numeSet;
+    vector<Parfum> parfumuri;  // Relatie de has-a cu clasa Parfum
+    int pretTotal;
 
-// Suprascrierea operatorului de înmulțire (*)
-Parfum operator*(double factor) {
-    Parfum result = *this;
-    result.pret *= factor;
-    return result;
-}
+public:
+    SetCosmetic(string numeSet) {
+        // Constructor
+        this->numeSet = numeSet;
+        pretTotal = 0;
+    }
 
-// Suprascrierea operatorului de afișare (<<)
-friend std::ostream& operator<<(std::ostream& out, const Parfum& parfum) {
-    out << "Nume: " << parfum.nume << ", Pret: " << parfum.pret << ", Cantitate: " << parfum.cantitate_ml << " ml";
-    return out;
-}
+    // Getteri si setteri pentru atributele clasei
+    string getNumeSet() const { return numeSet; }
+    int getPretTotal() const { return pretTotal; }
 
-// Funcție prietenă
-friend double calculeazaReducere(const Parfum& parfum, double procent);
+    void setNumeSet(string nume) { numeSet = nume; }
+    void setPretTotal(int pret) { pretTotal = pret; }
+
+    // Metoda pentru adaugarea unui parfum in set
+    void adaugaParfum(const Parfum& parfum) {
+        parfumuri.push_back(parfum);
+        pretTotal += parfum.getAnLansare();  // Exemplu de calcul al pretului total
+    }
+
+    // Metoda pentru afisarea informatiilor despre set
+    void afiseazaSet() const {
+        cout << "Nume set: " << numeSet << endl;
+        cout << "Parfumuri in set:\n";
+        for (const auto& parfum : parfumuri) {
+            cout << "  - " << parfum.getMarca() << " (An lansare: " << parfum.getAnLansare() << ")\n";
+        }
+        cout << "Pret total: " << pretTotal << endl;
+    }
+
+    // Operatori la alegere
+    bool operator==(const SetCosmetic& other) const {
+        return (numeSet == other.numeSet) && (pretTotal == other.pretTotal);
+    }
+
+    SetCosmetic operator+(const SetCosmetic& other) const {
+        SetCosmetic result = *this;
+        result.pretTotal += other.pretTotal;
+        return result;
+    }
+
+    SetCosmetic& operator+=(const Parfum& parfum) {
+        adaugaParfum(parfum);
+        return *this;
+    }
+
+// Metoda pentru scrierea informatiilor in fisier binar
+    void scrieInFisierBinar(const string& numeFisier) const {
+        ofstream fout(numeFisier, ios::binary);
+        if (fout.is_open()) {
+            fout.write(reinterpret_cast<const char*>(&numeSet), sizeof(numeSet));
+            fout.write(reinterpret_cast<const char*>(&pretTotal), sizeof(pretTotal));
+            size_t numarParfumuri = parfumuri.size();
+            fout.write(reinterpret_cast<const char*>(&numarParfumuri), sizeof(numarParfumuri));
+            for (const Parfum& parfum : parfumuri) {
+                fout.write(reinterpret_cast<const char*>(&parfum), sizeof(parfum));
+            }
+            fout.close();
+            cout << "Datele au fost scrise in fisierul binar.\n";
+        } else {
+            cerr << "Eroare la deschiderea fisierului binar.\n";
+        }
+    }
+
+    // Metoda pentru citirea informatiilor din fisier binar
+    void citesteDinFisierBinar(const string& numeFisier) {
+        ifstream fin(numeFisier, ios::binary);
+        if (fin.is_open()) {
+            fin.read(reinterpret_cast<char*>(&numeSet), sizeof(numeSet));
+            fin.read(reinterpret_cast<char*>(&pretTotal), sizeof(pretTotal));
+            size_t numarParfumuri;
+            fin.read(reinterpret_cast<char*>(&numarParfumuri), sizeof(numarParfumuri));
+            parfumuri.resize(numarParfumuri);
+            for (Parfum& parfum : parfumuri) {
+                fin.read(reinterpret_cast<char*>(&parfum), sizeof(parfum));
+            }
+            fin.close();
+            cout << "Datele au fost citite din fisierul binar.\n";
+        } else {
+            cerr << "Eroare la deschiderea fisierului binar.\n";
+        }
+    }
 };
 
 class Oja {
 private:
-    string culoare;
-    double pret;
-    int cantitate_ml;
+    string marca;
+    int pret;
+    const string categorie = "oja";
+    static int numarOje;
+    int* pointer;
 
 public:
-    // Atribute constante
-    static const int cod_produs = 1002;
+    Oja(string marca, int pret) {
+        this->marca = marca;
+        this->pret = pret;
+        numarOje++;
+        pointer = new int;
+    }
 
-    // Atribute statice
-    static int numar_total_vandute;
+    Oja(string marca) {
+        this->marca = marca;
+        this->pret = 0;
+        numarOje++;
+        pointer = new int;
+    }
 
-    // Constructori
-    Oja() : culoare("Rosu"), pret(10.0), cantitate_ml(15) {}
-    Oja(string culoare, double pret, int cantitate_ml)
-        : culoare(culoare), pret(pret), cantitate_ml(cantitate_ml) {}
-    Oja(string culoare, double pret)
-        : culoare(culoare), pret(pret), cantitate_ml(15) {}
-    Oja(string culoare)
-        : culoare(culoare), pret(10.0), cantitate_ml(15) {}
+    Oja() {
+        this->marca = "Necunoscut";
+        this->pret = 0;
+        numarOje++;
+        pointer = new int;
+    }
 
-    // Constructor de copiere
     Oja(const Oja& other) {
-        culoare = other.culoare;
+        marca = other.marca;
         pret = other.pret;
-        cantitate_ml = other.cantitate_ml;
+        pointer = new int(*other.pointer);
     }
 
-    // Destructor
     ~Oja() {
-        // Nu este nevoie s? eliber?m memorie alocat? în HEAP, deoarece nu am alocat memorie dinamic?
+         pointer;
     }
 
-    // Metode de acces (get-eri si set-eri)
-    string getCuloare() const { return culoare; }
-    void setCuloare(const string& c) { culoare = c; }
+    string getMarca() const { return marca; }
+    int getPret() const { return pret; }
+    void setMarca(string newMarca) { marca = newMarca; }
+    void setPret(int newPret) { pret = newPret; }
 
-    double getPret() const { return pret; }
-    void setPret(double p) { pret = p; }
+    static int getNumarOje() { return numarOje; }
 
-    int getCantitateMl() const { return cantitate_ml; }
-    void setCantitateMl(int cant) { cantitate_ml = cant; }
-
-    // Functie statica pentru procesare
-    static double calculareReducere(double pret, double procent) {
-        return pret - (pret * procent / 100);
+    static void procesareOja() {
+        cout << "Procesare oja" << endl;
     }
-
-    friend double calculeazaProfit(const Oja& oja);
 };
 
-// Initializare atribut statice
-int Oja::numar_total_vandute = 0;
-
-double calculeazaProfit(const Oja& oja) {
-    return oja.pret * oja.cantitate_ml;
-}
-
-// Suprascrierea operatorului de atribuire
+//operatori
 Oja& operator=(const Oja& other) {
-    if (this != &other) {
-        culoare = other.culoare;
-        pret = other.pret;
-        cantitate_ml = other.cantitate_ml;
+        if (this != &other) {
+            delete pointer;
+            marca = other.marca;
+            pret = other.pret;
+            pointer = new int(*other.pointer);
+        }
+        return *this;
     }
-    return *this;
+
+    Oja operator+(int value) const {
+        Oja result = *this;
+        result.pret += value;
+        return result;
+    }
+
+    Oja operator-(int value) const {
+        Oja result = *this;
+        result.pret -= value;
+        return result;
+    }
+
+    Oja operator*(int value) const {
+        Oja result = *this;
+        result.pret *= value;
+        return result;
+    }
+
+    friend ostream& operator<<(ostream& os, const Oja& o);
+};
+
+int Oja::numarOje = 0;
+
+ostream& operator<<(ostream& os, const Oja& o) {
+    os << "Marca: " << o.marca << ", Pret: " << o.pret;
+    return os;
+}
+    
+  friend istream& operator>>(istream& is, Oja& o);
+};
+
+int Oja::numarOje = 0;
+
+istream& operator>>(istream& is, Oja& o) {
+    cout << "Introduceti marca ojei: ";
+    is >> o.marca;
+    cout << "Introduceti pretul ojei: ";
+    is >> o.pret;
+    return is;
 }
 
-// Suprascrierea operatorului de adunare (+)
-Oja operator+(const Oja& other) {
-    Oja result = *this;
-    result.pret += other.pret;
-    result.cantitate_ml += other.cantitate_ml;
-    return result;
-}
+class LacUnghii : public Oja {
+private:
+    string tipLac; // Nou atribut specific
+public:
+    // Constructor specific pentru LacUnghii
+    LacUnghii(string marca, int pret, string tipLac) : Oja{marca, pret}, tipLac{tipLac} {}
 
-// Suprascrierea operatorului de scadere (-)
-Oja operator-(const Oja& other) {
-    Oja result = *this;
-    result.pret -= other.pret;
-    result.cantitate_ml -= other.cantitate_ml;
-    return result;
-}
-
-// Suprascrierea operatorului de înmulțire (*)
-Oja operator*(double factor) {
-    Oja result = *this;
-    result.pret *= factor;
-    return result;
-}
-
-// Suprascrierea operatorului de afișare (<<)
-friend std::ostream& operator<<(std::ostream& out, const Oja& oja) {
-    out << "Culoare: " << oja.culoare << ", Pret: " << oja.pret << ", Cantitate: " << oja.cantitate_ml << " ml";
-    return out;
-}
-
-// Funcție prietenă
-friend double calculeazaProfit(const Oja& oja);
+    // Metoda specifica pentru LacUnghii
+    void aplicaLacUnghii() {
+        cout << "Lacul de unghii " << getMarca() << " a fost aplicat. Tip: " << tipLac << "\n";
+    }
 };
 
 class Ruj {
 private:
-    string culoare;
-    double pret;
-    int cantitate_g;
+    string marca;
+    int cantitate;
+    const string categorie = "ruj";
+    static int numarRuje;
+    int* pointer;
 
 public:
-    // Atribute constante
-    static const int cod_produs = 1003;
+    Ruj(string marca, int cantitate) {
+        this->marca = marca;
+        this->cantitate = cantitate;
+        numarRuje++;
+        pointer = new int;
+    }
 
-    // Atribute statice
-    static int numar_total_vandute;
+    Ruj(string marca) {
+        this->marca = marca;
+        this->cantitate = 0;
+        numarRuje++;
+        pointer = new int;
+    }
 
-    // Constructori
-    Ruj() : culoare("Roz"), pret(15.0), cantitate_g(5) {}
-    Ruj(string culoare, double pret, int cantitate_g)
-        : culoare(culoare), pret(pret), cantitate_g(cantitate_g) {}
-    Ruj(string culoare, double pret)
-        : culoare(culoare), pret(pret), cantitate_g(5) {}
-    Ruj(string culoare)
-        : culoare(culoare), pret(15.0), cantitate_g(5) {}
+    Ruj() {
+        this->marca = "Necunoscut";
+        this->cantitate = 0;
+        numarRuje++;
+        pointer = new int;
+    }
 
-    // Constructor de copiere
     Ruj(const Ruj& other) {
-        culoare = other.culoare;
-        pret = other.pret;
-        cantitate_g = other.cantitate_g;
+        marca = other.marca;
+        cantitate = other.cantitate;
+        pointer = new int(*other.pointer);
     }
 
-    // Destructor
     ~Ruj() {
-        // Nu este nevoie s? eliber?m memorie alocat? în HEAP, deoarece nu am alocat memorie dinamic?
+         pointer;
     }
 
-    // Metode de acces (get-eri si set-eri)
-    string getCuloare() const { return culoare; }
-    void setCuloare(const string& c) { culoare = c; }
+    string getMarca() const { return marca; }
+    int getCantitate() const { return cantitate; }
+    void setMarca(string newMarca) { marca = newMarca; }
+    void setCantitate(int newCantitate) { cantitate = newCantitate; }
 
-    double getPret() const { return pret; }
-    void setPret(double p) { pret = p; }
+    static int getNumarRuje() { return numarRuje; }
 
-    int getCantitateG() const { return cantitate_g; }
-    void setCantitateG(int cant) { cantitate_g = cant; }
-
-    // Functie statica pentru procesare
-    static bool verificaDisponibilitate(int cantitate) {
-        return cantitate > 0;
+    static void procesareRuj() {
+        cout << "Procesare ruj" << endl;
     }
 
-    friend bool verificaDisponibilitateRuj(const Ruj& ruj);
-};
-
-// Initializare atribut statice
-int Ruj::numar_total_vandute = 0;
-
-bool verificaDisponibilitateRuj(const Ruj& ruj) {
-    return ruj.cantitate_g > 0;
-}
-
-
-// Suprascrierea operatorului de atribuire
+//operatori
 Ruj& operator=(const Ruj& other) {
-    if (this != &other) {
-        culoare = other.culoare;
-        pret = other.pret;
-        cantitate_g = other.cantitate_g;
+        if (this != &other) {
+            delete pointer;
+            marca = other.marca;
+            cantitate = other.cantitate;
+            pointer = new int(*other.pointer);
+        }
+        return *this;
     }
-    return *this;
-}
 
-// Suprascrierea operatorului de adunare (+)
-Ruj operator+(const Ruj& other) {
-    Ruj result = *this;
-    result.pret += other.pret;
-    result.cantitate_g += other.cantitate_g;
-    return result;
-}
+    Ruj operator+(int value) const {
+        Ruj result = *this;
+        result.cantitate += value;
+        return result;
+    }
 
-// Suprascrierea operatorului de scadere (-)
-Ruj operator-(const Ruj& other) {
-    Ruj result = *this;
-    result.pret -= other.pret;
-    result.cantitate_g -= other.cantitate_g;
-    return result;
-}
+    Ruj operator-(int value) const {
+        Ruj result = *this;
+        result.cantitate -= value;
+        return result;
+    }
 
-// Suprascrierea operatorului de înmulțire (*)
-Ruj operator*(double factor) {
-    Ruj result = *this;
-    result.pret *= factor;
-    return result;
-}
+    Ruj operator*(int value) const {
+        Ruj result = *this;
+        result.cantitate *= value;
+        return result;
+    }
 
-// Suprascrierea operatorului de afișare (<<)
-friend std::ostream& operator<<(std::ostream& out, const Ruj& ruj) {
-    out << "Culoare: " << ruj.culoare << ", Pret: " << ruj.pret << ", Cantitate: " << ruj.cantitate_g << " g";
-    return out;
-}
-
-// Funcție prietenă
-friend bool verificaDisponibilitateRuj(const Ruj& ruj);
+    friend ostream& operator<<(ostream& os, const Ruj& r);
 };
 
-double calculeazaReducere(const Parfum& parfum, double procent) {
-    return parfum.pret - (parfum.pret * procent / 100);
+int Ruj::numarRuje = 0;
+
+    ostream& operator<<(ostream& os, const Ruj& r) {
+    os << "Marca: " << r.marca << ", Cantitate: " << r.cantitate;
+    return os;
 }
 
-double calculeazaProfit(const Oja& oja) {
-    return oja.pret * oja.cantitate_ml;
+friend istream& operator>>(istream& is, Ruj& r);
+};
+
+int Ruj::numarRuje = 0;
+
+istream& operator>>(istream& is, Ruj& r) {
+    cout << "Introduceti marca rujului: ";
+    is >> r.marca;
+    cout << "Introduceti cantitatea rujului: ";
+    is >> r.cantitate;
+    return is;
 }
 
-bool verificaDisponibilitateRuj(const Ruj& ruj) {
-    return ruj.cantitate_g > 0;
+class BalsamBuze : public Ruj {
+private:
+    bool areAroma; // Nou atribut specific
+public:
+    // Constructor specific pentru BalsamBuze
+    BalsamBuze(string marca, int cantitate, bool areAroma) : Ruj{marca, cantitate}, areAroma{areAroma} {}
+
+    // Metoda specifica pentru BalsamBuze
+    void aplicaBalsamBuze() {
+        cout << "Balsamul de buze " << getMarca() << " a fost aplicat. Aroma: " << (areAroma ? "da" : "nu") << "\n";
+    }
+};
+
+// Clasa abstracta pentru cosmetic
+class CosmeticAbstract {
+public:
+    virtual void aplicare() const = 0; // Metoda pur virtuala
+    virtual ~CosmeticAbstract() {} // Destructor virtual
+};
+
+// Clasa abstracta pentru makeup
+class MakeupAbstract : public CosmeticAbstract {
+public:
+    virtual void folosire() const = 0; // Metoda pur virtuala
+    virtual ~MakeupAbstract() {} // Destructor virtual
+};
+
+
+void functie1(const Parfum& p) {
+    cout << "Functie 1: Marca parfum: " << p.getMarca() << endl;
+}
+
+void functie2(const Oja& o) {
+    cout << "Functie 2: Pret oja: " << o.getPret() << endl;
 }
 
 int main() {
-    // Testarea operatorilor și funcțiilor
-    Parfum parfum1;
-    Parfum parfum2("Parfum A", 75.0, 100);
-    Parfum parfum3("Parfum B", 60.0);
+    // Testare constructori și metode
 
-    Oja oja1;
-    Oja oja2("Albastru", 12.0, 20);
-    Oja oja3("Verde", 8.0);
+    Parfum parfum1("Dolce&Gabbana", 2019);
+    Parfum parfum2("Chanel");
+    Parfum parfum3;
 
-    Ruj ruj1;
-    Ruj ruj2("Rosu", 20.0, 10);
-    Ruj ruj3("Maro", 18.0);
+    cout << "Numar parfumuri: " << Parfum::getNumarParfumuri() << endl;
 
-    // Suprascrierea operatorului de atribuire
-    Parfum parfum4 = parfum2;
-    Oja oja4 = oja2;
-    Ruj ruj4 = ruj2;
+    cout << "Marca parfum 1: " << parfum1.getMarca() << endl;
+    cout << "Anul lansarii parfum 2: " << parfum2.getAnLansare() << endl;
 
-    // Suprascrierea operatorilor matematici
-    Parfum sumaParfum = parfum2 + parfum3;
-    Oja diferentaOja = oja2 - oja3;
-    Ruj produsRuj = ruj2 * 2.0;
+    parfum3.setMarca("Paco Rabanne");
+    parfum3.setAnLansare(2020);
 
-    // Afișarea obiectelor folosind operatorul <<
-    std::cout << "Parfum 1: " << parfum1 << std::endl;
-    std::cout << "Parfum 4 (dupa atribuire): " << parfum4 << std::endl;
-    std::cout << "Suma Parfum: " << sumaParfum << std::endl;
-    std::cout << "Diferenta Oja: " << diferentaOja << std::endl;
-    std::cout << "Produs Ruj: " << produsRuj << std::endl;
+    cout << "Marca parfum 3: " << parfum3.getMarca() << endl;
+    cout << "Anul lansarii parfum 3: " << parfum3.getAnLansare() << endl;
 
-    // Folosirea funcțiilor prietene
-    double discountParfum = calculeazaReducere(parfum2, 10.0);
-    std::cout << "Reducere pentru Parfum 2: " << discountParfum << " lei" << std::endl;
+    Oja oja1("Essie", 30);
+    Oja oja2("OPI");
+    Oja oja3;
 
-    bool disponibilitateRuj = verificaDisponibilitateRuj(ruj3);
-    if (disponibilitateRuj) {
-        std.cout << "Rujul 3 este disponibil." << std::endl;
+    cout << "Numar oje: " << Oja::getNumarOje() << endl;
+
+    cout << "Marca oja 1: " << oja1.getMarca() << endl;
+    cout << "Pret oja 2: " << oja2.getPret() << endl;
+
+    oja3.setMarca("Sephora");
+    oja3.setPret(20);
+
+    cout << "Marca oja 3: " << oja3.getMarca() << endl;
+    cout << "Pret oja 3: " << oja3.getPret() << endl;
+
+    Ruj ruj1("MAC", 5);
+    Ruj ruj2("NYX");
+    Ruj ruj3;
+
+    cout << "Numar rujuri: " << Ruj::getNumarRuje() << endl;
+
+    cout << "Marca ruj 1: " << ruj1.getMarca() << endl;
+    cout << "Cantitate ruj 2: " << ruj2.getCantitate() << endl;
+
+    ruj3.setMarca("Maybelline");
+    ruj3.setCantitate(10);
+
+    cout << "Marca ruj 3: " << ruj3.getMarca() << endl;
+    cout << "Cantitate ruj 3: " << ruj3.getCantitate() << endl;
+
+    // Testare funcții globale prietene
+
+    functie1(parfum1);
+    functie2(oja2);
+
+    // Testare operatori si functii prietene
+    Parfum parfum4 = parfum1 + 2;
+    Oja oja4 = oja2 - 5;
+    Ruj ruj4 = ruj3 * 3;
+
+    cout << "Parfum 4: " << parfum4 << endl;
+    cout << "Oja 4: " << oja4 << endl;
+    cout << "Ruj 4: " << ruj4 << endl;
+
+    // Vectori de obiecte
+    vector<Parfum> vectorParfumuri(3);
+    vector<Oja> vectorOje(3);
+    vector<Ruj> vectorRuje(3);
+
+    // Citire obiecte pentru fiecare vector
+    for (int i = 0; i < 3; ++i) {
+        cout << "Introduceti date pentru obiectul " << i + 1 << " din vectorParfumuri:\n";
+        cin >> vectorParfumuri[i];
+        cout << "Introduceti date pentru obiectul " << i + 1 << " din vectorOje:\n";
+        cin >> vectorOje[i];
+        cout << "Introduceti date pentru obiectul " << i + 1 << " din vectorRuje:\n";
+        cin >> vectorRuje[i];
     }
-    else {
-        std::cout << "Rujul 3 nu este disponibil." << std::endl;
+
+    // Afisare obiecte pentru fiecare vector
+    cout << "Obiecte din vectorParfumuri:\n";
+    for (const auto& parfum : vectorParfumuri) {
+        cout << parfum << endl;
     }
 
+    cout << "Obiecte din vectorOje:\n";
+    for (const auto& oja : vectorOje) {
+        cout << oja << endl;
+    }
+
+    cout << "Obiecte din vectorRuje:\n";
+    for (const auto& ruj : vectorRuje) {
+        cout << ruj << endl;
+    }
+
+    // Matrice de obiecte
+    const int rows = 2;
+    const int cols = 2;
+    Parfum matriceParfumuri[rows][cols];
+
+    // Citire obiecte pentru matrice
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            cout << "Introduceti date pentru obiectul [" << i << "][" << j << "] din matriceParfumuri:\n";
+            cin >> matriceParfumuri[i][j];
+        }
+    }
+
+    // Afisare obiecte pentru matrice
+    cout << "Obiecte din matriceParfumuri:\n";
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            cout << matriceParfumuri[i][j] << endl;
+        }
+    }
+
+// Utilizarea a noii clase
+    Parfum parfum1("Dolce&Gabbana", 2019);
+    Parfum parfum2("Chanel", 2020);
+
+    SetCosmetic set1("Set Lux");
+    set1.adaugaParfum(parfum1);
+
+    SetCosmetic set2("Set Elegance");
+    set2 += parfum2;
+
+    SetCosmetic set3 = set1 + set2;
+
+    cout << "Informatii despre Set1:\n";
+    set1.afiseazaSet();
+
+    cout << "\nInformatii despre Set2:\n";
+    set2.afiseazaSet();
+
+    cout << "\nInformatii despre Set3 (combinație de Set1 și Set2):\n";
+    set3.afiseazaSet();
+
+    // Exemplu de utilizare a metodelor pentru Parfum
+    Parfum parfum;
+    parfum.scrieInFisierText("parfum.txt");
+    parfum.citesteDinFisierText("parfum.txt");
+
+    // Exemplu de utilizare a metodelor pentru SetCosmetic
+    SetCosmetic set("Set Lux");
+    set.scrieInFisierBinar("set.bin");
+    set.citesteDinFisierBinar("set.bin");
+
+    // Creare obiecte de tipul claselor extinse
+    LacUnghii lac("Essie", 25, "Mat");
+    BalsamBuze balsam("Labello", 10, true);
+
+    // Apelarea metodelor specifice noilor clase
+    lac.aplicaLacUnghii();
+    balsam.aplicaBalsamBuze();
+
+    // Upcasting - Transformarea unui obiect de tip derivat in obiect de tip de baza
+    Oja* ptrOja = &lac;
+    Ruj* ptrRuj = &balsam;
+
+    // Apelarea metodelor specifice clasei de baza
+    ptrOja->aplicareOja();
+    ptrRuj->folosireRuj();
+
+    // Vector de pointeri la tipul abstract
+    vector<CosmeticAbstract*> cosmetice;
+
+    // Adaugare obiecte in vector
+    cosmetice.push_back(new Parfum("Dolce&Gabbana", 2019));
+    cosmetice.push_back(new Oja("Essie", 30));
+
+    // Apelarea metodelor folosind late-binding
+    for (const auto& cosmetic : cosmetice) {
+        cosmetic->aplicare();
+        MakeupAbstract* ptrMakeup = dynamic_cast<MakeupAbstract*>(cosmetic);
+        if (ptrMakeup) {
+            ptrMakeup->folosire();
+        }
+    }
+
+    // Eliberarea memoriei
+    for (const auto& cosmetic : cosmetice) {
+        delete cosmetic;
+    }
+    
     return 0;
 }
+
